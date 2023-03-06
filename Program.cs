@@ -36,11 +36,9 @@ if (String.IsNullOrEmpty(typeName))
     throw new Exception("Enter type name");
 }
 
-
-
 string json = File.ReadAllText(jsonFile);
 
-var type = BuildTypeDefinition(json, typeName);
+var type = BuildClassDefinition(json, typeName);
 
 var assembly = BuildTypeAssembly(type);
 
@@ -50,13 +48,18 @@ if (assembly != null)
 {
     schema = BuildSchemaStringFromType(assembly, typeName);
 }
+else
+{
+    throw new Exception($"failed to create type and assembly for {type}");
+}
 
 var parsedSchema = EnrichSchema(schema);
 
-string outputJson = JsonConvert.SerializeObject(parsedSchema, Formatting.Indented).Replace("{},\\n",string.Empty);
+string outputJson = JsonConvert.SerializeObject(parsedSchema, Formatting.Indented).Replace("{},",string.Empty);
 
 Console.WriteLine(outputJson);
 
+//for the generated avro schema add bits that we need for datagen connector
 Object EnrichSchema(string schema)
 {
     JObject jObject = JObject.Parse(schema);
@@ -90,9 +93,10 @@ Object EnrichSchema(string schema)
     return jObject;
 }
 
-string BuildTypeDefinition(string s, string typeName)
+//takes json payload string and creates json schema and from that creates a c# class definition
+string BuildClassDefinition(string json, string typeName)
 {
-    var jsonSchema = JsonSchema.FromSampleJson(s);
+    var jsonSchema = JsonSchema.FromSampleJson(json);
 
     var generatorSettings = new CSharpGeneratorSettings
     {
@@ -106,19 +110,23 @@ string BuildTypeDefinition(string s, string typeName)
 
     var reg = new Regex(@"\[[^\]]*\]"); //use to remove any newtonsoft json in the generated class
 
-    var type1 = reg.Replace(generatedType, string.Empty);
-
-    var addtionalPropsRegEx = new Regex("public System.Collections.*}", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-    type1 = addtionalPropsRegEx.Replace(type1,String.Empty);
+    var type = reg.Replace(generatedType, string.Empty);
     
-    return type1.Replace("partial", String.Empty)
-        .Replace("private System.Collections.Generic.IDictionary<string, object> _additionalProperties;", "}}");
+    string privateVarToMatch = @"private System.Collections.Generic.IDictionary<string, object> _additionalProperties;";
+
+    string publicVarToMatch = @"public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }";
+    
+    return type.Replace("partial", String.Empty)
+        .Replace(privateVarToMatch, string.Empty).Replace(publicVarToMatch,string.Empty);
 }
 
-Assembly? BuildTypeAssembly(string s1)
+Assembly? BuildTypeAssembly(string classDefinition)
 {
-    SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(s1);
+    SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(classDefinition);
 
     CSharpCompilation compilation = CSharpCompilation.Create("MyAssembly")
         .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
