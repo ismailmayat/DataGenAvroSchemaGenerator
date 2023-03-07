@@ -32,7 +32,9 @@ public class ClassFromJson
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
         }";
-    
+
+        type = type.Replace("ICollection", "List");
+        
         return type.Replace("partial", String.Empty)
             .Replace(privateVarToMatch, string.Empty).Replace(publicVarToMatch,string.Empty);
     }

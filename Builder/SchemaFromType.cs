@@ -6,11 +6,11 @@ namespace DataGenAvroSchemaGenerator.Builder;
 
 public class SchemaFromType
 {
-    public string BuildSchemaStringFromType(Assembly assembly, string typeName1)
+    public string BuildSchemaStringFromType(Assembly assembly, string typeName)
     {
-        string schema1;
+        string schema;
         // Get the compiled type and create an instance of the class
-        Type classType = assembly.GetType(typeName1);
+        Type classType = assembly.GetType(typeName);
 
         AvroSerializerSettings settings = new AvroSerializerSettings
         {
@@ -28,7 +28,8 @@ public class SchemaFromType
 
         var writerSchemaTyped = (TypeSchema)actualValue;
 
-        schema1 = writerSchemaTyped.ToString();
-        return schema1;
+        schema = writerSchemaTyped.ToString();
+        
+        return schema;
     } 
 }
