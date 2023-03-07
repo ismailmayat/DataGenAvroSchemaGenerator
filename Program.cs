@@ -1,14 +1,8 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using Newtonsoft.Json.Linq;
-using NJsonSchema;
-using NJsonSchema.CodeGeneration.CSharp;
-using System.Reflection;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Text.RegularExpressions;
-using Microsoft.Hadoop.Avro;
-using Microsoft.Hadoop.Avro.Schema;
+using DataGenAvroSchemaGenerator.Builder;
 using Newtonsoft.Json;
 
 string jsonFile = "";
@@ -38,15 +32,41 @@ if (String.IsNullOrEmpty(typeName))
 
 string json = File.ReadAllText(jsonFile);
 
-var type = BuildClassDefinition(json, typeName);
+var classBuilder = new ClassFromJson();
 
-var assembly = BuildTypeAssembly(type);
+var type = classBuilder.BuildClassDefinition(json, typeName);
+
+var types = new List<string>();
+
+//do we have more than one type generated
+if (Regex.Matches(type, "class").Count > 0)
+{
+    string pattern = @"(public|private|protected|internal|static|\s)*\s*(class)\s+(\w+)\s*{[^{}]*({[^{}]*}[^{}]*)*}";
+    Regex regex = new Regex(pattern);
+    MatchCollection matches = regex.Matches(type);
+
+    foreach (Match match in matches)
+    {
+        string classDefinition = match.Groups[0].Value;
+        types.Add(classDefinition);
+    }
+}
+else
+{
+
+    types.Add(type);
+}
+
+var typeAssemblyBuilder = new TypeAssembly();
+
+var assembly = typeAssemblyBuilder.BuildTypeAssembly(types);
 
 String schema = string.Empty;
 
 if (assembly != null)
 {
-    schema = BuildSchemaStringFromType(assembly, typeName);
+    var schemaBuilder = new SchemaFromType();
+    schema = schemaBuilder.BuildSchemaStringFromType(assembly, typeName);
 }
 else
 {
@@ -93,91 +113,4 @@ Object EnrichSchema(string schema)
     return jObject;
 }
 
-//takes json payload string and creates json schema and from that creates a c# class definition
-string BuildClassDefinition(string json, string typeName)
-{
-    var jsonSchema = JsonSchema.FromSampleJson(json);
 
-    var generatorSettings = new CSharpGeneratorSettings
-    {
-        Namespace = "Sample",
-        GenerateDataAnnotations = false
-    };
-
-    var generator = new CSharpGenerator(jsonSchema, generatorSettings);
-
-    var generatedType = generator.GenerateFile(jsonSchema, typeName);
-
-    var reg = new Regex(@"\[[^\]]*\]"); //use to remove any newtonsoft json in the generated class
-
-    var type = reg.Replace(generatedType, string.Empty);
-    
-    string privateVarToMatch = @"private System.Collections.Generic.IDictionary<string, object> _additionalProperties;";
-
-    string publicVarToMatch = @"public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }";
-    
-    return type.Replace("partial", String.Empty)
-        .Replace(privateVarToMatch, string.Empty).Replace(publicVarToMatch,string.Empty);
-}
-
-Assembly? BuildTypeAssembly(string classDefinition)
-{
-    SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(classDefinition);
-
-    CSharpCompilation compilation = CSharpCompilation.Create("MyAssembly")
-        .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-        .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
-        .AddSyntaxTrees(syntaxTree);
-
-    Assembly assembly1 = null;
-
-    using (var ms = new System.IO.MemoryStream())
-    {
-        var result = compilation.Emit(ms);
-        if (!result.Success)
-        {
-            // Handle compilation errors
-            foreach (Diagnostic diagnostic in result.Diagnostics)
-            {
-                Console.WriteLine(diagnostic.ToString());
-            }
-        }
-        else
-        {
-            ms.Seek(0, System.IO.SeekOrigin.Begin);
-            assembly1 = Assembly.Load(ms.ToArray());
-        }
-    }
-
-    return assembly1;
-}
-
-string BuildSchemaStringFromType(Assembly assembly, string typeName1)
-{
-    string schema1;
-    // Get the compiled type and create an instance of the class
-    Type classType = assembly.GetType("Sample." + typeName1);
-
-    AvroSerializerSettings settings = new AvroSerializerSettings
-    {
-        Resolver = new AvroPublicMemberContractResolver()
-    };
-
-    var method = typeof(AvroSerializer).GetMethod("Create", new Type[] { typeof(AvroSerializerSettings) })
-        .MakeGenericMethod(new[] { classType });
-
-    var createdTyped = method.Invoke(null, new object[] { settings });
-
-    var writerSchema = createdTyped.GetType().GetProperty("WriterSchema");
-
-    var actualValue = writerSchema.GetValue(createdTyped);
-
-    var writerSchemaTyped = (TypeSchema)actualValue;
-
-    schema1 = writerSchemaTyped.ToString();
-    return schema1;
-} 
