@@ -36,6 +36,11 @@ var outputJson = jsonToAvro.ConvertJsonToDataGenAvro(json, typeName);
 
 Console.WriteLine(outputJson);
 
+string directoryPath = Path.GetDirectoryName(jsonFile);
 
+var outPutFile = Path.Combine(directoryPath, $"{typeName}.avsc");
 
+File.WriteAllText(outPutFile,outputJson);
+
+Console.WriteLine($"file created at {outPutFile}");
 
