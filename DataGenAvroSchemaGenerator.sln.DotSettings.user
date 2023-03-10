@@ -6,5 +6,7 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=3c66d973_002D8d94_002D4d70_002Db5f8_002D15256b18f478/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Can_Convert_Single_Level_Json" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;NUnit3x::6E325120-77C3-4815-8E60-E57A30AD1E47::net6.0::tests.Tests.Can_Convert_Single_Level_Json&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::6E325120-77C3-4815-8E60-E57A30AD1E47::net6.0::tests.Tests.Can_Convert_Nested_Json&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::6E325120-77C3-4815-8E60-E57A30AD1E47::net6.0::tests.JsonBuilderTests.Can_Build_With_Nested_Types&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

@@ -3,9 +3,11 @@ using DataGenAvroSchemaGenerator.Builder;
 using FluentAssertions;
 using Newtonsoft.Json;
 using tests.TestModels;
+using tests.TestModels.Complex;
 
 namespace tests;
 
+[TestFixture]
 public class Tests
 {
     private JsonToAvro _jsonToAvro;
@@ -25,6 +27,8 @@ public class Tests
 
         var json = _jsonToAvro.ConvertJsonToDataGenAvro(singleLevelJson, type);
   
+        Console.WriteLine(json);
+        
         var result = JsonConvert.DeserializeObject<Simple>(json);
 
         result.name.Should().Be(type);
@@ -38,7 +42,20 @@ public class Tests
     [Test]
     public void Can_Convert_Nested_Json()
     {
+        string nestedJson = @"{""stringProperty"":""test""
+                              ,""integerProperty"":1,
+                               ""nestedProperty"":{""innerString"":""innerValue""}
+                              }";
+
+        string type = "Nested";
         
+        var json = _jsonToAvro.ConvertJsonToDataGenAvro(nestedJson, type);
+
+        Console.WriteLine(json);
+        
+        var result = JsonConvert.DeserializeObject<Nested>(json);
+
+        json.Length.Should().BePositive();
     }
 
 }
