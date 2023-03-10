@@ -33,7 +33,7 @@ public class JsonBuilder
             var typeNode = fields[c];
 
             string type = typeNode["type"].ToString();
-
+            
             if (type.Contains("record"))
             {
                 var record = JObject.Parse(type);   
@@ -51,9 +51,11 @@ public class JsonBuilder
     private static void ModifyToken(JToken typeNode)
     {
         string type = typeNode["type"].ToString();
-        
-        string name = typeNode["name"].ToString();
 
+        string name = typeNode["name"].ToString();
+        
+        //todo if array then put in min max attributes
+        
         var newType = BuildTypeObject(type);
 
         var outerType = BuildOuterTypeObject(name, newType);

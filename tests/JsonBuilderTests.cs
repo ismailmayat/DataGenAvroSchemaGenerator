@@ -20,11 +20,12 @@ public class JsonBuilderTests
                            "{\"name\":\"NestedProperty\"," +
                            "\"type\":{\"type\":\"record\",\"name\":\"NestedProperty\",\"fields\":[{\"name\":\"InnerString\",\"type\":\"string\"},{\"name\":\"InnerInt\",\"type\":\"int\"}]}}]}"
             ;
-
-        var result = jsonBuilder.Enrich(nestedSchema);
-
-        Console.WriteLine(result);
         
-        result.Length.Should().BePositive();
+        var result = jsonBuilder.Enrich(nestedSchema);
+        
+        var expected = Expected.NestedExpected;
+
+        result.Should().Be(expected);
     }
+    
 }

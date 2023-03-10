@@ -21,4 +21,19 @@
       <ProjectReference Include="..\DataGenAvroSchemaGenerator.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Update="Expected.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Expected.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Expected.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Expected.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
 </Project>

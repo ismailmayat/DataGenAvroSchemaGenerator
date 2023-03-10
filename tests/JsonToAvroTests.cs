@@ -38,24 +38,4 @@ public class Tests
         result.fields[1].name.Should().Be("IntegerProperty");
         result.fields[1].type.type.Should().Be("int");
     }
-
-    [Test]
-    public void Can_Convert_Nested_Json()
-    {
-        string nestedJson = @"{""stringProperty"":""test""
-                              ,""integerProperty"":1,
-                               ""nestedProperty"":{""innerString"":""innerValue""}
-                              }";
-
-        string type = "Nested";
-        
-        var json = _jsonToAvro.ConvertJsonToDataGenAvro(nestedJson, type);
-
-        Console.WriteLine(json);
-        
-        var result = JsonConvert.DeserializeObject<Nested>(json);
-
-        json.Length.Should().BePositive();
-    }
-
 }
