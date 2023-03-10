@@ -1,9 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using Newtonsoft.Json.Linq;
-using System.Text.RegularExpressions;
+using DataGenAvroSchemaGenerator;
 using DataGenAvroSchemaGenerator.Builder;
-using Newtonsoft.Json;
 
 string jsonFile = "";
 string typeName ="";
@@ -32,51 +30,9 @@ if (String.IsNullOrEmpty(typeName))
 
 string json = File.ReadAllText(jsonFile);
 
-var classBuilder = new ClassFromJson();
+var jsonToAvro = new JsonToAvro(new JsonBuilder(), new ClassFromJson(), new SchemaFromType(), new TypeAssembly());
 
-var type = classBuilder.BuildClassDefinition(json, typeName);
-
-var types = new List<string>();
-
-//do we have more than one type generated
-if (Regex.Matches(type, "class").Count > 0)
-{
-    string pattern = @"(public|private|protected|internal|static|\s)*\s*(class)\s+(\w+)\s*{[^{}]*({[^{}]*}[^{}]*)*}";
-    Regex regex = new Regex(pattern);
-    MatchCollection matches = regex.Matches(type);
-
-    foreach (Match match in matches)
-    {
-        string classDefinition = match.Groups[0].Value;
-        types.Add(classDefinition);
-    }
-}
-else
-{
-
-    types.Add(type);
-}
-
-var typeAssemblyBuilder = new TypeAssembly();
-
-var assembly = typeAssemblyBuilder.BuildTypeAssembly(types);
-
-String schema = string.Empty;
-
-if (assembly != null)
-{
-    var schemaBuilder = new SchemaFromType();
-    schema = schemaBuilder.BuildSchemaStringFromType(assembly, typeName);
-}
-else
-{
-    throw new Exception($"failed to create type and assembly for {type}");
-}
-
-var jsonBuilder = new JsonBuilder();
-
-var outputJson = jsonBuilder.Enrich(schema);
-
+var outputJson = jsonToAvro.ConvertJsonToDataGenAvro(json, typeName);
 
 Console.WriteLine(outputJson);
 

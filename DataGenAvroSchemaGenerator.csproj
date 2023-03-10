@@ -21,4 +21,16 @@
       <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="tests\**" />
+    </ItemGroup>
+
 </Project>
