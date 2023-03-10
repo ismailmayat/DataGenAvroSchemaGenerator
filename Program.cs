@@ -7,7 +7,7 @@ string jsonFile = "";
 string typeName ="";
 
 
-if (Environment.GetEnvironmentVariable("DOCKER_CONTAINER") != null)
+if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") != null)
 {
     jsonFile = Environment.GetEnvironmentVariable("JSONFILE");
     typeName = Environment.GetEnvironmentVariable("TYPENAME");

@@ -3,7 +3,10 @@ version: '3.4'
 services:
   application:
     image: datagen-avro-schema-generator
+    volumes:
+      - /tmp:/tmp
     build: .
     environment:
-      - JSONFILE=/pathtosome/some.json
-      - TYPENAME = sometype
+      - JSONFILE=/tmp/user.json
+      - TYPENAME=Sometype
+
