@@ -61,4 +61,4 @@ This will give you
 }
 ```
 
-In the generated template json in the options field you can fill in the values you require for the properties.
+In the generated template json in the options field you can fill in the values you require for the properties.  This generated schema can be pasted into the schema.string field of the DataGen connector.

@@ -7,6 +7,6 @@ services:
       - /tmp:/tmp
     build: .
     environment:
-      - JSONFILE=/tmp/user.json
-      - TYPENAME=Sometype
+      - JSONFILE=/tmp/user.json #change this to your directory and file
+      - TYPENAME=Sometype # change this to your type
 
