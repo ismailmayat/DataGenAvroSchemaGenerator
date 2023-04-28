@@ -62,3 +62,17 @@ This will give you
 ```
 
 In the generated template json in the options field you can fill in the values you require for the properties.  This generated schema can be pasted into the schema.string field of the DataGen connector.
+
+There is a docker-compose file if you do not have Visual studio or Rider installed to build the binary.
+
+You can also build the binary using 
+
+```
+dotnet build -c Release
+```
+
+you will need to ensure you have [dotnet6 sdk installed](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
+
+The binary will be output in folder /bin/Release/net6.0
+
+
